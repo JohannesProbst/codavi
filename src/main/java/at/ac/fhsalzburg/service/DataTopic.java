@@ -21,7 +21,6 @@ public class DataTopic extends Topic {
 
     @Override
     public void run() {
-        System.err.println(this.schema);
         setRunning(true);
         while(true) {
             Random rnd = new Random();

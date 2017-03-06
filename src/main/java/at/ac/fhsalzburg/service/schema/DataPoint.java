@@ -3,7 +3,6 @@ package at.ac.fhsalzburg.service.schema;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 
-@XmlAccessorType(XmlAccessType.FIELD)
 public class DataPoint {
 
     private String field;

@@ -2,6 +2,7 @@ package at.ac.fhsalzburg.service;
 
 import at.ac.fhsalzburg.service.schema.DataPoint;
 import at.ac.fhsalzburg.service.schema.DataSchema;
+import at.ac.fhsalzburg.service.schema.VegaSchema;
 import com.google.common.base.Strings;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.springframework.messaging.core.MessageSendingOperations;
@@ -64,13 +65,13 @@ public class TopicHandler {
             if(!Strings.isNullOrEmpty(schema)) {
                 try {
                     // Could be cached via springconfiguration
-                    JAXBContext jc = org.eclipse.persistence.jaxb.JAXBContext.newInstance(DataSchema.class, DataPoint.class);
+                    JAXBContext jc = org.eclipse.persistence.jaxb.JAXBContext.newInstance(VegaSchema.class,DataSchema.class, DataPoint.class);
                     Unmarshaller unmarshaller = jc.createUnmarshaller();
                     unmarshaller.setProperty("eclipselink.media-type", "application/json");
                     unmarshaller.setProperty("eclipselink.json.include-root", false);
                     InputStream json = new ByteArrayInputStream(schema.getBytes(StandardCharsets.UTF_8));
-                    DataSchema parsedSchema = (DataSchema) unmarshaller.unmarshal(new StreamSource(json), DataSchema.class).getValue();
-                    topic = new DataTopic(destination, messagingTemplate, dataSource, parsedSchema);
+                    VegaSchema parsedSchema = (VegaSchema) unmarshaller.unmarshal(new StreamSource(json), VegaSchema.class).getValue();
+                    topic = new DataTopic(destination, messagingTemplate, dataSource, parsedSchema.getSchema());
                 } catch (JAXBException e) {
                     e.printStackTrace();
                     throw new RuntimeException(e);
