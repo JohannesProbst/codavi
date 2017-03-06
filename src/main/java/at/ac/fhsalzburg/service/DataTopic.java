@@ -1,19 +1,27 @@
 package at.ac.fhsalzburg.service;
 
+import at.ac.fhsalzburg.service.schema.DataSchema;
 import org.springframework.messaging.core.MessageSendingOperations;
 
 import java.util.Random;
-import java.util.concurrent.TimeUnit;
 
-public class RandomDataTopic extends Topic {
+/**
+ * Created by Johan on 05.03.2017.
+ */
+public class DataTopic extends Topic {
 
+    private DataSchema schema;
+    private String datasource;
 
-    public RandomDataTopic(String name, MessageSendingOperations<String> messagingTemplate) {
+    public DataTopic(String name, MessageSendingOperations<String> messagingTemplate, String datasource, DataSchema schema) {
         super(name, messagingTemplate);
+        this.datasource = datasource;
+        this.schema = schema;
     }
 
     @Override
     public void run() {
+        System.err.println(this.schema);
         setRunning(true);
         while(true) {
             Random rnd = new Random();

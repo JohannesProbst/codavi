@@ -1,8 +1,18 @@
 package at.ac.fhsalzburg.service;
 
+import at.ac.fhsalzburg.service.schema.DataPoint;
+import at.ac.fhsalzburg.service.schema.DataSchema;
+import com.google.common.base.Strings;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.springframework.messaging.core.MessageSendingOperations;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.transform.stream.StreamSource;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -47,10 +57,33 @@ public class TopicHandler {
     }
 
     //erzeugen eines topic
-    public synchronized void createTopic(String destination, MessageSendingOperations<String> messagingTemplate){
+    public synchronized void createTopic(String destination, MessageSendingOperations<String> messagingTemplate, String schema, String dataSource, Long interval){
         if(!topics.containsKey(destination)){
-            Topic topic = new RandomDataTopic(destination, messagingTemplate);
+
+            Topic topic;
+            if(!Strings.isNullOrEmpty(schema)) {
+                try {
+                    // Could be cached via springconfiguration
+                    JAXBContext jc = org.eclipse.persistence.jaxb.JAXBContext.newInstance(DataSchema.class, DataPoint.class);
+                    Unmarshaller unmarshaller = jc.createUnmarshaller();
+                    unmarshaller.setProperty("eclipselink.media-type", "application/json");
+                    unmarshaller.setProperty("eclipselink.json.include-root", false);
+                    InputStream json = new ByteArrayInputStream(schema.getBytes(StandardCharsets.UTF_8));
+                    DataSchema parsedSchema = (DataSchema) unmarshaller.unmarshal(new StreamSource(json), DataSchema.class).getValue();
+                    topic = new DataTopic(destination, messagingTemplate, dataSource, parsedSchema);
+                } catch (JAXBException e) {
+                    e.printStackTrace();
+                    throw new RuntimeException(e);
+                }
+            } else {
+                topic = new RandomDataTopic(destination, messagingTemplate);
+            }
             topics.put(destination,topic);
+        } else {
+            Topic topic = topics.get(destination);
+            if(topic != null){
+                topic.updateInterval(interval);
+            }
         }
     }
 

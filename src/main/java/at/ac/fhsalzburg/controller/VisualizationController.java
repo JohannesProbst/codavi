@@ -24,12 +24,12 @@ public class VisualizationController {
     private MessageSendingOperations<String> messagingTemplate;
 
     @RequestMapping(value = "uuids/{uuid}", method = RequestMethod.GET, params = {"data", "interval"})
-    public String getVisualization(@PathVariable("uuid") String chartUuid, @RequestParam("data") String data, @RequestParam("interval") String interval, Model model){
+    public String getVisualization(@PathVariable("uuid") String chartUuid, @RequestParam("data") String data, @RequestParam("interval") Long interval, Model model){
         String uuidSpecification = uuidRepository.getUuid(chartUuid);
         model.addAttribute("spec", uuidSpecification);
         model.addAttribute("uuid", chartUuid);
 
-        topicHandler.createTopic("/topic/"+chartUuid, messagingTemplate);
+        topicHandler.createTopic("/topic/"+chartUuid, messagingTemplate, uuidSpecification, data, interval);
 
         return "index";
     }
