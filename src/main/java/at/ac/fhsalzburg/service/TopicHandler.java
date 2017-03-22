@@ -1,7 +1,7 @@
 package at.ac.fhsalzburg.service;
 
-import at.ac.fhsalzburg.service.schema.DataPoint;
-import at.ac.fhsalzburg.service.schema.DataSchema;
+import at.ac.fhsalzburg.service.schema.DataProperty;
+import at.ac.fhsalzburg.service.schema.DataObjectSchema;
 import at.ac.fhsalzburg.service.schema.VegaSchema;
 import com.google.common.base.Strings;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
@@ -65,7 +65,7 @@ public class TopicHandler {
             if(!Strings.isNullOrEmpty(schema)) {
                 try {
                     // Could be cached via springconfiguration
-                    JAXBContext jc = org.eclipse.persistence.jaxb.JAXBContext.newInstance(VegaSchema.class,DataSchema.class, DataPoint.class);
+                    JAXBContext jc = org.eclipse.persistence.jaxb.JAXBContext.newInstance(VegaSchema.class,DataObjectSchema.class, DataProperty.class);
                     Unmarshaller unmarshaller = jc.createUnmarshaller();
                     unmarshaller.setProperty("eclipselink.media-type", "application/json");
                     unmarshaller.setProperty("eclipselink.json.include-root", false);

@@ -10,13 +10,13 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class VegaSchema {
 
     @XmlElement(name="dataSchema")
-    private DataSchema schema;
+    private DataObjectSchema schema;
 
-    public DataSchema getSchema() {
+    public DataObjectSchema getSchema() {
         return schema;
     }
 
-    public void setSchema(DataSchema schema) {
+    public void setSchema(DataObjectSchema schema) {
         this.schema = schema;
     }
 }

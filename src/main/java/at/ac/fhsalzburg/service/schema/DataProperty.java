@@ -1,18 +1,16 @@
 package at.ac.fhsalzburg.service.schema;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-
-public class DataPoint {
+public class DataProperty {
 
     private String field;
     private String selector;
+    private String type;
 
     public String getField() {
         return field;
     }
 
-    public DataPoint setField(String field) {
+    public DataProperty setField(String field) {
         this.field = field;
         return this;
     }
@@ -21,20 +19,29 @@ public class DataPoint {
         return selector;
     }
 
-    public DataPoint setSelector(String selector) {
+    public DataProperty setSelector(String selector) {
         this.selector = selector;
+        return this;
+    }
+
+    public String getType() {
+        return this.type;
+    }
+
+    public DataProperty setType(String type) {
+        this.type = type;
         return this;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof DataPoint)) return false;
+        if (!(o instanceof DataProperty)) return false;
 
-        DataPoint dataPoint = (DataPoint) o;
+        DataProperty dataProperty = (DataProperty) o;
 
-        if (field != null ? !field.equals(dataPoint.field) : dataPoint.field != null) return false;
-        return selector != null ? selector.equals(dataPoint.selector) : dataPoint.selector == null;
+        if (field != null ? !field.equals(dataProperty.field) : dataProperty.field != null) return false;
+        return selector != null ? selector.equals(dataProperty.selector) : dataProperty.selector == null;
 
     }
 
