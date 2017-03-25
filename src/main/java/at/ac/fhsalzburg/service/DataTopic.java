@@ -7,7 +7,9 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
 
+import at.ac.fhsalzburg.service.schema.TransformType;
 import com.google.common.base.Strings;
+import net.fortuna.ical4j.model.DateTime;
 import org.eclipse.persistence.dynamic.DynamicEntity;
 import org.eclipse.persistence.jaxb.JAXBContextProperties;
 import org.eclipse.persistence.jaxb.MarshallerProperties;
@@ -23,10 +25,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by Johan on 05.03.2017.
@@ -86,6 +85,13 @@ public class DataTopic extends Topic {
             if(Strings.isNullOrEmpty(this.schema.getContainer())){
                 DynamicEntity out = context.newDynamicEntity("dynamic.outputDataObject");
                 for (DataProperty property : schema.getDataProperties()) {
+                    //TODO: if transform is set do transformation here
+                    //Optional<TransformType> transformType = Optional.of(property.getTransformType());
+                    //transformType.ifPresent(tt -> tt.convert(property.getField()));
+                    /*if(property.getTransformType() != null){
+                        DateTime dateTime = (DateTime) property.getTransformType().convert(in.get(property.getField()));
+                        out.set(property.getField(), dateTime);
+                    }*/
                     out.set(property.getField(), in.get(property.getField()));
                 }
                 content.add(out);

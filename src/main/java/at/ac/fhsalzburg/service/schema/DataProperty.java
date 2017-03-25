@@ -5,6 +5,7 @@ public class DataProperty {
     private String field;
     private String selector;
     private String type;
+    //private TransformType transformType;
 
     public String getField() {
         return field;
@@ -32,6 +33,15 @@ public class DataProperty {
         this.type = type;
         return this;
     }
+
+    /*public TransformType getTransformType() {
+        return transformType;
+    }
+
+    public DataProperty setTransformType(TransformType transformType) {
+        this.transformType = transformType;
+        return this;
+    }*/
 
     @Override
     public boolean equals(Object o) {

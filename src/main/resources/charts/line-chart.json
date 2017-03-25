@@ -1,0 +1,94 @@
+{
+  "width": 400,
+  "height": 200,
+  "padding": {
+    "top": 10,
+    "left": 30,
+    "bottom": 30,
+    "right": 10
+  },
+  "dataSchema": {
+    "fields": [
+      {
+        "field":"temp",
+        "selector":"//*[@id=\"curTemp\"]/span/span[1]/text()",
+        "type":"java.lang.Integer"
+      },
+      {
+        "field":"timestamp",
+        "selector":"//*[@id=\"location\"]/div[1]/span/text()",
+        "type":"java.lang.String"
+      }
+    ]
+  },
+  "data": [
+    {
+      "name": "table"
+    }
+  ],
+  "scales": [
+    {
+      "name": "x",
+      "type": "ordinal",
+      "range": "width",
+      "domain": {
+        "data": "table",
+        "field": "temp"
+      }
+    },
+    {
+      "name": "y",
+      "type": "linear",
+      "range": "height",
+      "domain": {
+        "data": "table",
+        "field": "amount"
+      },
+      "nice": true
+    }
+  ],
+  "axes": [
+    {"type": "x", "scale": "x"},
+    {"type": "y", "scale": "y"}
+  ],
+  "marks":
+  [
+    {
+      "type": "rect",
+      "from": {
+        "data": "table"
+      },
+      "properties": {
+        "enter": {
+          "x": {
+            "scale": "x",
+            "field": "temp"
+          },
+          "width": {
+            "scale": "x",
+            "band": true,
+            "offset": -1
+          },
+          "y": {
+            "scale": "y",
+            "field": "amount"
+          },
+          "y2": {
+            "scale": "y",
+            "value": 0
+          }
+        },
+        "update": {
+          "fill": {
+            "value": "steelblue"
+          }
+        },
+        "hover": {
+          "fill": {
+            "value": "red"
+          }
+        }
+      }
+    }
+  ]
+}

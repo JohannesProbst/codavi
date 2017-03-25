@@ -1,0 +1,18 @@
+{
+  "dataSchema": {
+    "container": "bla",
+    "fields": [
+      {
+        "field": "category",
+        "selector": "/foo/bar/baz/value()",
+        "type": "java.lang.String",
+        "transform": "TIMESTAMP"
+      },
+      {
+        "field": "amount",
+        "selector": "/foo/bar/value()",
+        "type": "java.lang.Integer"
+      }
+    ]
+  }
+}
