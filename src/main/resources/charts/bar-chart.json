@@ -8,17 +8,17 @@
     "right": 10
   },
   "dataSchema": {
-    "container": "bla",
     "fields": [
       {
-        "field":"category",
-        "selector":"/foo/bar/baz/value()",
-        "type":"java.lang.String"
+        "field":"temp",
+        "selector":"/main/temp/text()",
+        "type":"java.lang.Double"
       },
       {
-        "field":"amount",
-        "selector":"/foo/bar/value()",
-        "type":"java.lang.Integer"
+        "field":"timestamp",
+        "selector":"/dt/text()",
+        "type":"java.lang.String",
+        "transformTo":"TIMESTAMP"
       }
     ]
   },
@@ -34,7 +34,7 @@
       "range": "width",
       "domain": {
         "data": "table",
-        "field": "category"
+        "field": "temp"
       }
     },
     {
@@ -43,7 +43,7 @@
       "range": "height",
       "domain": {
         "data": "table",
-        "field": "amount"
+        "field": "timestamp"
       },
       "nice": true
     }
@@ -63,7 +63,7 @@
         "enter": {
           "x": {
             "scale": "x",
-            "field": "category"
+            "field": "temp"
           },
           "width": {
             "scale": "x",
@@ -72,7 +72,7 @@
           },
           "y": {
             "scale": "y",
-            "field": "amount"
+            "field": "timestamp"
           },
           "y2": {
             "scale": "y",

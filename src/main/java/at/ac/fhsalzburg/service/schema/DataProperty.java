@@ -1,11 +1,14 @@
 package at.ac.fhsalzburg.service.schema;
 
+import javax.xml.bind.annotation.XmlElement;
+
 public class DataProperty {
 
     private String field;
     private String selector;
     private String type;
-    //private TransformType transformType;
+    @XmlElement(name="transformTo")
+    private TransformType transformType;
 
     public String getField() {
         return field;
@@ -34,14 +37,14 @@ public class DataProperty {
         return this;
     }
 
-    /*public TransformType getTransformType() {
+    public TransformType getTransformType() {
         return transformType;
     }
 
     public DataProperty setTransformType(TransformType transformType) {
         this.transformType = transformType;
         return this;
-    }*/
+    }
 
     @Override
     public boolean equals(Object o) {

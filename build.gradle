@@ -58,8 +58,10 @@ dependencies {
 	compile("org.eclipse.persistence:org.eclipse.persistence.moxy:2.6.4")
 
 	testCompile('org.springframework.boot:spring-boot-starter-test')
-
+	//Time and Date Conversion
 	compile("com.joestelmach:natty:0.13")
+	//migration of html into valid xhtml
+	compile("org.jsoup:jsoup:1.10.2")
 }
 
 bootRun {

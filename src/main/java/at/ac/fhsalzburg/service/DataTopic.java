@@ -3,13 +3,13 @@ package at.ac.fhsalzburg.service;
 import at.ac.fhsalzburg.service.schema.DataProperty;
 import at.ac.fhsalzburg.service.schema.DataObjectSchema;
 
+import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
-
-import at.ac.fhsalzburg.service.schema.TransformType;
 import com.google.common.base.Strings;
 import net.fortuna.ical4j.model.DateTime;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.eclipse.persistence.dynamic.DynamicEntity;
 import org.eclipse.persistence.jaxb.JAXBContextProperties;
 import org.eclipse.persistence.jaxb.MarshallerProperties;
@@ -20,16 +20,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.core.MessageSendingOperations;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-/**
- * Created by Johan on 05.03.2017.
- */
 public class DataTopic extends Topic {
 
     private DataObjectSchema schema;
@@ -46,11 +40,12 @@ public class DataTopic extends Topic {
         // Next steps: Daten von datasource laden
         //              Dynamisches Schema aus moxy verwenden um daten http://www.eclipse.org/eclipselink/documentation/2.5/solutions/jpatoxml006.htm
         //              Daten welche im Dataschema angegeben sind extrahieren und zurückgeben.
-
+        System.setProperty(JAXBContext.JAXB_CONTEXT_FACTORY, "org.eclipse.persistence.jaxb.JAXBContextFactory");
         setRunning(true);
         try {
         Map<String, Object> properties = new HashMap<String, Object>();
-        properties.put(JAXBContextProperties.OXM_METADATA_SOURCE, createDynamicBindings(this.schema));
+        InputStream is = new ByteArrayInputStream(createDynamicBindings(this.schema).getBytes(StandardCharsets.UTF_8));
+        properties.put(JAXBContextProperties.OXM_METADATA_SOURCE, is);
 
         final DynamicJAXBContext context = DynamicJAXBContextFactory.createContextFromOXM(null, properties);
         final Unmarshaller um = context.createUnmarshaller();
@@ -58,7 +53,7 @@ public class DataTopic extends Topic {
         final Class<? extends DynamicEntity> resultsClass = context.newDynamicEntity(inputClass).getClass();
 
         final Marshaller m = context.createMarshaller();
-        m.setProperty(MarshallerProperties.MEDIA_TYPE, MediaType.APPLICATION_JSON);
+        m.setProperty(MarshallerProperties.MEDIA_TYPE, "application/json");
         m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
         m.setProperty(MarshallerProperties.JSON_INCLUDE_ROOT, false);
 
@@ -67,15 +62,16 @@ public class DataTopic extends Topic {
             // Hier daten Daten laden und verarbeiten....
             RestTemplate restTemplate = new RestTemplate();
             ResponseEntity<String> response = restTemplate.getForEntity(datasource, String.class);
-
+            InputStream inputStream = new ByteArrayInputStream(response.getBody().getBytes(StandardCharsets.UTF_8));
             if (response.getHeaders().getContentType().toString().startsWith(MediaType.APPLICATION_JSON_VALUE)) {
                 um.setProperty("eclipselink.media-type", "application/json");
                 um.setProperty("eclipselink.json.include-root", false);
                 um.setProperty(MarshallerProperties.JSON_WRAPPER_AS_ARRAY_NAME, true);
             }
+            if (response.getHeaders().getContentType().toString().startsWith(MediaType.TEXT_HTML_VALUE)){
+                throw new Exception("Resources with content-type: text/html are not processable so far.");
+            }
 
-
-            InputStream inputStream = new ByteArrayInputStream(response.getBody().getBytes(StandardCharsets.UTF_8));
             DynamicEntity in = (DynamicEntity) um.unmarshal(new StreamSource(inputStream), resultsClass).getValue();
 
             //TODO: find test-data with data for bar-chart, pi-chart and line-chart tests
@@ -88,23 +84,23 @@ public class DataTopic extends Topic {
                     //TODO: if transform is set do transformation here
                     //Optional<TransformType> transformType = Optional.of(property.getTransformType());
                     //transformType.ifPresent(tt -> tt.convert(property.getField()));
-                    /*if(property.getTransformType() != null){
+                    if(property.getTransformType() != null){
                         DateTime dateTime = (DateTime) property.getTransformType().convert(in.get(property.getField()));
                         out.set(property.getField(), dateTime);
-                    }*/
+                    }
                     out.set(property.getField(), in.get(property.getField()));
                 }
                 content.add(out);
             } else {
                 for (DynamicEntity dataPoint : (List<DynamicEntity>) in.get("dataPointList")) {
-                    DynamicEntity out = context.newDynamicEntity("dynamic.outputDataObject");
+                    DynamicEntity out = context.newDynamicEntity("dynamic.outputDataContainer");
                     for (DataProperty property : schema.getDataProperties()) {
                         out.set(property.getField(), dataPoint.get(property.getField()));
                     }
                     content.add(out);
                 }
             }
-            DynamicEntity list = context.newDynamicEntity("dynamic.outputData");
+            DynamicEntity list = context.newDynamicEntity("dynamic.outputDataContainer");
             list.set("dataPointList", content);
             OutputStream outputStream = new ByteArrayOutputStream();
             m.marshal(list, outputStream);
@@ -124,6 +120,7 @@ public class DataTopic extends Topic {
             }
         }
         }catch (Exception ex){
+            send(ex.toString());
             ex.printStackTrace();
         }
     }
@@ -135,20 +132,22 @@ public class DataTopic extends Topic {
         // Input data from Datasource
         builder.append("<java-types>");
 
-        builder.append("<java-type name=\"dynamic.inputDataContainer\"> <xml-root-element/> <java-attributes>" )
-            .append("<xml-element java-attribute=\"dataPointList\" xml-path=\"")
-                .append(schema.getContainer()).append("\"")
-                .append(" type=\"dynamic.inputDataObject\"")
-                .append(" container-type=\"java.util.ArrayList\"")
-                .append("/>")
-                .append("</java-attributes> </java-type>");
+        //if(schema.getContainer() != null) {
+            builder.append("<java-type name=\"dynamic.inputDataContainer\"> <xml-root-element/> <java-attributes>")
+                    .append("<xml-element java-attribute=\"dataPointList\" xml-path=\"")
+                    .append(schema.getContainer()).append("\"")
+                    .append(" type=\"dynamic.inputDataObject\"")
+                    .append(" container-type=\"java.util.ArrayList\"")
+                    .append("/>")
+                    .append("</java-attributes> </java-type>");
+        //}
 
         builder.append("<java-type name=\"dynamic.inputDataObject\"> <xml-root-element/> <java-attributes>");
         for(DataProperty property : schema.getDataProperties()){
             builder.append("<xml-element java-attribute=\"")
                     .append(property.getField())
                     .append("\" xml-path=\"")
-                    .append(property.getSelector())
+                    .append(StringEscapeUtils.escapeXml(property.getSelector()))
                     .append("\" type=\"")
                     .append(property.getType())
                     .append("\"/>");
@@ -157,21 +156,22 @@ public class DataTopic extends Topic {
         // Output data for Vega
 
         // Container with list of dynamic.out
-        builder.append("<java-types>");
-        builder.append("<java-type name=\"dynamic.outputData\"> <xml-root-element/> <java-attributes>" )
-                .append("<xml-element java-attribute=\"dataPointList\"")
-                .append(schema.getContainer()).append("\"")
-                .append(" type=\"dynamic.outputDataObject\"")
-                .append(" container-type=\"java.util.ArrayList\"")
-                .append("/>")
-                .append("</java-attributes> </java-type>");
-
+        //if(schema.getContainer() != null) {
+            //builder.append("<java-types>");
+            builder.append("<java-type name=\"dynamic.outputDataContainer\"> <xml-root-element/> <java-attributes>")
+                    .append("<xml-element java-attribute=\"dataPointList\" xml-path=\"")
+                    .append(schema.getContainer()).append("\"")
+                    .append(" type=\"dynamic.outputDataObject\"")
+                    .append(" container-type=\"java.util.ArrayList\"")
+                    .append("/>")
+                    .append("</java-attributes> </java-type>");
+        //}
         builder.append("<java-type name=\"dynamic.outputDataObject\"> <java-attributes>");
         for(DataProperty point : schema.getDataProperties()) {
                     builder.append("<xml-element java-attribute=\"")
                             .append(point.getField())
                             .append("\" xml-path=\"")
-                            .append(point.getField())
+                            .append(StringEscapeUtils.escapeXml(point.getField()))
                             .append("/text()\" type=\"")
                             .append(point.getType())
                             .append("\"/>");
