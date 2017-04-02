@@ -77,21 +77,24 @@ public class DataTopic extends Topic {
             //TODO: find test-data with data for bar-chart, pi-chart and line-chart tests
             //TODO: introduce multiple java-script handler for different data handling
 
-            ArrayList<DynamicEntity> content = new ArrayList<DynamicEntity>();
+            List<DynamicEntity> content = new ArrayList<>();
             if(Strings.isNullOrEmpty(this.schema.getContainer())){
                 DynamicEntity out = context.newDynamicEntity("dynamic.outputDataObject");
                 for (DataProperty property : schema.getDataProperties()) {
-                    //TODO: if transform is set do transformation here
-                    //Optional<TransformType> transformType = Optional.of(property.getTransformType());
-                    //transformType.ifPresent(tt -> tt.convert(property.getField()));
+                    Object fieldValue = in.get(property.getField());
                     if(property.getTransformType() != null){
-                        DateTime dateTime = (DateTime) property.getTransformType().convert(in.get(property.getField()));
-                        out.set(property.getField(), dateTime);
+                        DateTime dateTime = (DateTime) property.getTransformType().convert(fieldValue.toString());
+                        StringBuffer sb = new StringBuffer("new Date(");
+                        sb.append(dateTime.getTime());
+                        sb.append(")");
+                        out.set(property.getField(), sb.toString());
+                    } else {
+                        out.set(property.getField(), fieldValue);
                     }
-                    out.set(property.getField(), in.get(property.getField()));
                 }
                 content.add(out);
             } else {
+                // TODO: transfer duplicated code into own method
                 for (DynamicEntity dataPoint : (List<DynamicEntity>) in.get("dataPointList")) {
                     DynamicEntity out = context.newDynamicEntity("dynamic.outputDataContainer");
                     for (DataProperty property : schema.getDataProperties()) {
@@ -160,7 +163,7 @@ public class DataTopic extends Topic {
             //builder.append("<java-types>");
             builder.append("<java-type name=\"dynamic.outputDataContainer\"> <xml-root-element/> <java-attributes>")
                     .append("<xml-element java-attribute=\"dataPointList\" xml-path=\"")
-                    .append(schema.getContainer()).append("\"")
+                    .append("table").append("\"")
                     .append(" type=\"dynamic.outputDataObject\"")
                     .append(" container-type=\"java.util.ArrayList\"")
                     .append("/>")

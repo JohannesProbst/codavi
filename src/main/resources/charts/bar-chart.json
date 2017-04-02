@@ -20,7 +20,10 @@
         "type":"java.lang.String",
         "transformTo":"TIMESTAMP"
       }
-    ]
+    ],
+    "handling": {
+      "mode": "lifo"
+    }
   },
   "data": [
     {

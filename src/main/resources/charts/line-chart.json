@@ -10,16 +10,19 @@
   "dataSchema": {
     "fields": [
       {
-        "field":"temp",
+        "field":"timestamp",
         "selector":"//*[@id=\"content\"]/div[2]/div[1]/div[1]/p[3]/text()",
         "type":"java.lang.Integer"
       },
       {
-        "field":"timestamp",
+        "field":"temp",
         "selector":"//*[@id=\"content\"]/div[2]/div[1]/div[2]/p[6]/span/text()",
         "type":"java.lang.String"
       }
-    ]
+    ],
+    "handling": {
+      "mode": "lifo"
+    }
   },
   "data": [
     {
@@ -42,7 +45,7 @@
       "range": "height",
       "domain": {
         "data": "table",
-        "field": "amount"
+        "field": "timestamp"
       },
       "nice": true
     }
@@ -71,7 +74,7 @@
           },
           "y": {
             "scale": "y",
-            "field": "amount"
+            "field": "timestamp"
           },
           "y2": {
             "scale": "y",
