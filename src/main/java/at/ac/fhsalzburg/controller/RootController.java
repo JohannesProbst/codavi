@@ -12,7 +12,7 @@ public class RootController {
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public HttpEntity<String> rootMenu(){
-        String menu = "menu";
+        String menu = "root menu";
         return new ResponseEntity<String>(menu, HttpStatus.OK);
     }
 }

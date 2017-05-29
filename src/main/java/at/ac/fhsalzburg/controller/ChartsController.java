@@ -32,7 +32,7 @@ public class ChartsController {
     }
 
     public String getChartEntriesOverview() {
-        return "";
+        return "charts menu";
     }
 
     @RequestMapping(value = "/{chartName}", method = RequestMethod.GET)
