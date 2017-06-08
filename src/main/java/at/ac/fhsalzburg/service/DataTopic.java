@@ -72,8 +72,14 @@ public class DataTopic extends Topic {
                 throw new Exception("Resources with content-type: text/html are not processable so far.");
             }
 
-            DynamicEntity in = (DynamicEntity) um.unmarshal(new StreamSource(inputStream), resultsClass).getValue();
-
+            Object o =  um.unmarshal(new StreamSource(inputStream), resultsClass).getValue();
+            DynamicEntity in = null;
+            if(o instanceof List){
+                // TODO only one datapoint is processed
+                in = (DynamicEntity)((List)o).get(0);
+            } else {
+                in = (DynamicEntity) o;
+            }
             //TODO: find test-data with data for bar-chart, pi-chart and line-chart tests
             //TODO: introduce multiple java-script handler for different data handling
 

@@ -1,6 +1,8 @@
 var stompClient = null;
 var view = null;
 var specification = null;
+var buffer = null;
+var bufferSize = 1;
 
 function init(spec, uuid){
     // init vega
@@ -9,6 +11,17 @@ function init(spec, uuid){
         view = chart({el:"#container", renderer: "svg"});
         view.update();
     });
+
+var handling = specification.dataSchema.handling;
+switch(handling.mode){
+    case'reloadAll':
+        break;
+    case'lifo':
+        bufferSize = specification.dataSchema.handling.size;
+        buffer = new Array(bufferSize);
+        break;
+}
+
     // connect ws
     connect(uuid);
 }
@@ -73,5 +86,11 @@ function replaceAll(view, dataToInsert) {
 //TODO:fix this and the visualisation
 function lifo(view, dataToInsert) {
     //new data in
-    view.data("table").insert(dataToInsert);
+    if(buffer.length + dataToInsert.length > bufferSize){
+        buffer = buffer.slice(dataToInsert.length);
+    }
+    buffer.push.apply(buffer, dataToInsert);
+    view.data("table").remove(function (d) {
+        return true
+    }).insert(buffer);
 }

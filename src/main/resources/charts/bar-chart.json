@@ -11,18 +11,19 @@
     "fields": [
       {
         "field":"temp",
-        "selector":"/main/temp/text()",
+        "selector":"/value/text()",
         "type":"java.lang.Double"
       },
       {
         "field":"timestamp",
-        "selector":"/dt/text()",
+        "selector":"/time/text()",
         "type":"java.lang.String",
         "transformTo":"TIMESTAMP"
       }
     ],
     "handling": {
-      "mode": "lifo"
+      "mode": "lifo",
+      "size":42
     }
   },
   "data": [
@@ -37,7 +38,7 @@
       "range": "width",
       "domain": {
         "data": "table",
-        "field": "temp"
+        "field": "timestamp"
       }
     },
     {
@@ -46,7 +47,7 @@
       "range": "height",
       "domain": {
         "data": "table",
-        "field": "timestamp"
+        "field": "temp"
       },
       "nice": true
     }
@@ -66,7 +67,7 @@
         "enter": {
           "x": {
             "scale": "x",
-            "field": "temp"
+            "field": "timestamp"
           },
           "width": {
             "scale": "x",
@@ -75,7 +76,7 @@
           },
           "y": {
             "scale": "y",
-            "field": "timestamp"
+            "field": "temp"
           },
           "y2": {
             "scale": "y",
