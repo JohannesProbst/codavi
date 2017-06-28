@@ -1,15 +1,49 @@
 package at.ac.fhsalzburg.repository;
 
+import at.ac.fhsalzburg.controller.ChartsController;
+import at.ac.fhsalzburg.entity.Chart;
+import com.google.common.io.CharStreams;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Repository;
+
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.util.ArrayList;
+import java.util.List;
 
 @Repository
 public class PredefinedChartRepositoryImpl implements PredefinedChartRepository {
 
     @Override
     public String getChartByName(String chartName) {
-        if(chartName.equals("bar_chart")){
-            return "{   \"width\": 400,   \"height\": 200,   \"padding\": {\"top\": 10, \"left\": 30, \"bottom\": 30, \"right\": 10},   \"data\": [     {       \"name\": \"table\"  }   ],   \"scales\": [     {       \"name\": \"x\",       \"type\": \"ordinal\",       \"range\": \"width\",       \"domain\": {\"data\": \"table\", \"field\": \"x\"}     },     {       \"name\": \"y\",       \"type\": \"linear\",       \"range\": \"height\",       \"domain\": {\"data\": \"table\", \"field\": \"y\"},       \"nice\": true     }   ],   \"axes\": [     {\"type\": \"x\", \"scale\": \"x\"},     {\"type\": \"y\", \"scale\": \"y\"}   ],   \"marks\": [     {       \"type\": \"rect\",       \"from\": {\"data\": \"table\"},       \"properties\": {         \"enter\": {           \"x\": {\"scale\": \"x\", \"field\": \"x\"},           \"width\": {\"scale\": \"x\", \"band\": true, \"offset\": -1},           \"y\": {\"scale\": \"y\", \"field\": \"y\"},           \"y2\": {\"scale\": \"y\", \"value\": 0}         },         \"update\": {           \"fill\": {\"value\": \"steelblue\"}         },         \"hover\": {           \"fill\": {\"value\": \"red\"}         }       }     }   ] }";
+        if(chartName.equals("bar-chart")){
+            Resource resource = new ClassPathResource("charts/bar-chart.json");
+            try(final Reader reader = new InputStreamReader(resource.getInputStream())) {
+                return CharStreams.toString(reader);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        if(chartName.equals("line-chart")){
+            Resource resource = new ClassPathResource("charts/line-chart.json");
+            try(final Reader reader = new InputStreamReader(resource.getInputStream())) {
+                return CharStreams.toString(reader);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         return "";
+    }
+
+    @Override
+    public List<Chart> getAllChartNames() {
+        List<Chart> charts = new ArrayList<>();
+        charts.add(new Chart());
+        charts.get(charts.size()-1).name = "Bar Chart";
+        charts.add(new Chart());
+        charts.get(charts.size()-1).name = "Line Chart";
+        return charts;
     }
 }
