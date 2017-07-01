@@ -90,7 +90,10 @@ function lifo(view, dataToInsert) {
         buffer = buffer.slice(dataToInsert.length);
     }
     buffer.push.apply(buffer, dataToInsert);
-    view.data("table").remove(function (d) {
-        return true
-    }).insert(buffer);
+
+    model = view.model();
+    model.data("table").insert(dataToInsert).remove(function (d) {
+        return !buffer.includes(d); // Funktioniert nicht im IE
+    });
+
 }

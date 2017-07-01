@@ -86,7 +86,25 @@
         "update": {
           "fill": {
             "value": "steelblue"
+          },
+          "x": {
+            "scale": "x",
+            "field": "timestamp"
+          },
+          "width": {
+            "scale": "x",
+            "band": true,
+            "offset": -1
+          },
+          "y": {
+            "scale": "y",
+            "field": "temp"
+          },
+          "y2": {
+            "scale": "y",
+            "value": 0
           }
+
         },
         "hover": {
           "fill": {
