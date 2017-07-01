@@ -22,6 +22,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.*;
 
 public class DataTopic extends Topic {
@@ -89,10 +90,11 @@ public class DataTopic extends Topic {
                 for (DataProperty property : schema.getDataProperties()) {
                     Object fieldValue = in.get(property.getField());
                     if(property.getTransformType() != null){
-                        DateTime dateTime = (DateTime) property.getTransformType().convert(fieldValue.toString());
+                        //Instant dateTime = (Instant) property.getTransformType().convert(fieldValue.toString());
                         StringBuffer sb = new StringBuffer("new Date(");
-                        sb.append(dateTime.getTime());
-                        sb.append(")");
+                        //sb.append(dateTime.toEpochMilli());
+                        sb.append(String.valueOf(fieldValue));
+                        sb.append(").getTime()");
                         out.set(property.getField(), sb.toString());
                     } else {
                         out.set(property.getField(), fieldValue);

@@ -23,12 +23,13 @@
     ],
     "handling": {
       "mode": "lifo",
-      "size":42
+      "size":5
     }
   },
   "data": [
     {
-      "name": "table"
+      "name": "table",
+      "format": {"type": "json", "parse": {"temp":"number", "timestamp":"date"}}
     }
   ],
   "scales": [
@@ -53,7 +54,8 @@
     }
   ],
   "axes": [
-    {"type": "x", "scale": "x"},
+    {"type": "x", "scale": "x", "formatType":"time",
+      "format":"%Y-%m-%dT%H:%M:%S.%LZ"},
     {"type": "y", "scale": "y"}
   ],
   "marks":

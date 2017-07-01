@@ -13,7 +13,7 @@ public class App {
         MockWebServer server = new MockWebServer();
 
 
-        Iterator<String> sensorDataIterator = Files.readAllLines(Paths.get(ClassLoader.getSystemResource("sensordata.json").toURI())).iterator();
+        Iterator<String> sensorDataIterator = Files.readAllLines(Paths.get(ClassLoader.getSystemResource("sensordata1.json").toURI())).iterator();
         Dispatcher dispatcher = new Dispatcher() {
             @Override
             public MockResponse dispatch(RecordedRequest request) throws InterruptedException {
