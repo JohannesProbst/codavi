@@ -8,90 +8,168 @@
     "right": 10
   },
   "dataSchema": {
+    "container":"values",
     "fields": [
       {
-        "field":"timestamp",
-        "selector":"//*[@id=\"content\"]/div[2]/div[1]/div[1]/p[3]/text()",
-        "type":"java.lang.Integer"
+        "field":"price",
+        "selector":"price/text()",
+        "type":"java.lang.Double"
       },
       {
-        "field":"temp",
-        "selector":"//*[@id=\"content\"]/div[2]/div[1]/div[2]/p[6]/span/text()",
+        "field":"date",
+        "selector":"date/text()",
+        "type":"java.lang.String"
+      },
+      {
+        "field":"symbol",
+        "selector":"symbol/text()",
         "type":"java.lang.String"
       }
     ],
     "handling": {
-      "mode": "lifo"
+      "mode": "reloadAll"
     }
   },
   "data": [
     {
-      "name": "table"
+      "name": "table",
+      "format": {"type": "json", "parse": {"price":"number", "date":"date"}}
     }
   ],
   "scales": [
     {
       "name": "x",
-      "type": "ordinal",
+      "type":"time",
       "range": "width",
-      "domain": {
-        "data": "table",
-        "field": "temp"
-      }
+      "domain": {"data": "table", "field": "date"}
     },
     {
       "name": "y",
       "type": "linear",
       "range": "height",
-      "domain": {
-        "data": "table",
-        "field": "timestamp"
-      },
-      "nice": true
+      "nice": true,
+      "domain": {"data": "table", "field": "price"}
+    },
+    {
+      "name": "hugo",
+      "type": "ordinal",
+      "domain": {"data": "table", "field": "symbol"},
+      "range": "category10"
     }
   ],
   "axes": [
-    {"type": "x", "scale": "x"},
-    {"type": "y", "scale": "y"}
-  ],
-  "marks":
-  [
     {
-      "type": "rect",
-      "from": {
-        "data": "table"
-      },
-      "properties": {
-        "enter": {
-          "x": {
-            "scale": "x",
-            "field": "temp"
-          },
-          "width": {
-            "scale": "x",
-            "band": true,
-            "offset": -1
-          },
-          "y": {
-            "scale": "y",
-            "field": "timestamp"
-          },
-          "y2": {
-            "scale": "y",
-            "value": 0
-          }
-        },
-        "update": {
-          "fill": {
-            "value": "steelblue"
-          }
-        },
-        "hover": {
-          "fill": {
-            "value": "red"
-          }
+      "type": "x",
+      "scale": "x",
+      "grid":true,
+      "tickSizeEnd": 0,
+      "formatType":"utc",
+      "format":"%X",
+      "properties":{
+        "labels": {
+          "fill": {"value": "steelblue"},
+          "angle": {"value": 50},
+          "fontSize": {"value": 14},
+          "align": {"value": "left"},
+          "baseline": {"value": "middle"},
+          "dx": {"value": 3}
         }
       }
+    },
+    {"type": "y", "scale": "y", "grid":true}
+  ],
+  "signals": [
+    {
+      "name": "tooltip",
+      "init": {},
+      "streams": [
+        {"type": "symbol:mouseover", "expr": "datum"},
+        {"type": "symbol:mouseout", "expr": "{}"}
+      ]
+    }
+  ],
+
+  "predicates": [
+    {
+      "name": "tooltip", "type": "==",
+      "operands": [{"signal": "tooltip._id"}, {"arg": "id"}]
+    }
+  ],
+  "marks": [
+    {
+      "type": "group",
+      "from": {
+        "data": "table",
+        "transform": [{"type": "facet", "groupby": ["symbol"]}]
+      },
+      "marks": [
+        {
+          "type": "line",
+          "properties": {
+            "enter": {
+              "x": {"scale": "x", "field": "date"},
+              "y": {"scale": "y", "field": "price"},
+              "stroke": {"scale": "hugo", "field": "symbol"},
+              "strokeWidth": {"value": 2}
+            },
+            "update": {
+              "x": {"scale": "x", "field": "date"},
+              "y": {"scale": "y", "field": "price"},
+              "stroke": {"scale": "hugo", "field": "symbol"},
+              "strokeWidth": {"value": 2}
+            }
+          }
+        },
+        {
+          "type": "symbol",
+          "from": {"data":"table"},
+          "shape":"cross",
+          "properties": {
+            "enter": {
+              "x": { "scale": "x", "field": "date" },
+              "y": { "scale": "y", "field": "price" },
+              "fill": { "value": "orange" },
+              "stroke": { "value": "black" },
+              "strockWidth": { "value": 2 }
+            },
+            "update": {
+              "stroke":{ "value":"steelblue" },
+              "x": { "scale": "x", "field": "date" },
+              "y": { "scale": "y", "field": "price" },
+              "fill": { "value": "orange" },
+              "strockWidth": { "value": 2 }
+            },
+            "hover": {
+              "stroke": { "value":"red" }
+            }
+          }
+        },
+        {
+          "type": "text",
+          "properties": {
+            "enter": {
+              "align": { "value": "center"},
+              "baseline": { "value": "bottom"},
+              "fill": { "value": "grey"}
+
+            },
+            "update": {
+              "x": { "scale": "x", "signal": "tooltip.date"},
+              "y": { "scale": "y", "signal": "tooltip.price", "offset": -10},
+              "text": { "signal": "tooltip.price"},
+              "fillOpacity": {
+                "rule": [
+                  {
+                    "predicate": {"name": "tooltip", "id": {"value": null}},
+                    "value": 0
+                  },
+                  {"value": 1}
+                ]
+              }
+            }
+          }
+        }
+      ]
     }
   ]
 }

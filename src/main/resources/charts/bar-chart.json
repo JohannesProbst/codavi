@@ -55,7 +55,18 @@
   ],
   "axes": [
     {"type": "x", "scale": "x", "formatType":"time",
-      "format":"%Y-%m-%dT%H:%M:%S.%LZ"},
+      "format":"%Y-%m-%dT%H:%M:%S.%LZ",
+      "properties":{
+        "labels": {
+          "fill": {"value": "steelblue"},
+          "angle": {"value": 50},
+          "fontSize": {"value": 14},
+          "align": {"value": "left"},
+          "baseline": {"value": "middle"},
+          "dx": {"value": 3}
+        }
+      }
+    },
     {"type": "y", "scale": "y"}
   ],
   "marks":
