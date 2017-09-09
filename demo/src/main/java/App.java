@@ -40,10 +40,10 @@ public class App {
                     }
                     Boolean isRequestForMultipleValues = false;
                     Integer n = queryParam == null? 1 : Integer.parseInt(queryParam);
-                    if(n>1) {
+                    //if(n>1) {
                         isRequestForMultipleValues = true;
                         builder.append("{ \"values\": ");
-                    }
+                    //}
                         builder.append("[ ");
                     do{
                         if (!App.dataIterator.hasNext()){
@@ -56,9 +56,9 @@ public class App {
                     }while (n>0);
 
                     builder.append("]");
-                    if(isRequestForMultipleValues){
+                    //if(isRequestForMultipleValues){
                         builder.append(" }");
-                    }
+                    //}
                     response.setBody(builder.toString());
                 }
                 return response;

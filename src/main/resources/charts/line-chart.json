@@ -4,8 +4,8 @@
   "padding": {
     "top": 10,
     "left": 30,
-    "bottom": 30,
-    "right": 10
+    "bottom": 60,
+    "right": 40
   },
   "dataSchema": {
     "container":"values",
@@ -27,7 +27,10 @@
       }
     ],
     "handling": {
-      "mode": "reloadAll"
+      "mode": "lifo",
+      "animate":true,
+      "postProcess":true,
+      "size":5
     }
   },
   "data": [
@@ -48,7 +51,9 @@
       "type": "linear",
       "range": "height",
       "nice": true,
-      "domain": {"data": "table", "field": "price"}
+      "domain": {"data": "table", "field": "price"},
+      "domainMin": 0,
+      "domainMax": 100
     },
     {
       "name": "hugo",
@@ -76,7 +81,11 @@
         }
       }
     },
-    {"type": "y", "scale": "y", "grid":true}
+    {
+      "type": "y",
+      "scale": "y",
+      "grid":true
+    }
   ],
   "signals": [
     {

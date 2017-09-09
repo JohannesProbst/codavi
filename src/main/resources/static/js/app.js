@@ -23,7 +23,7 @@ function init(spec, uuid){
         connect(uuid, view);
     });
 }
-// TODO: Handle connection errors
+
 function connect(uuid, view) {
 
     var socket = new SockJS('/data');
@@ -58,7 +58,7 @@ function connect(uuid, view) {
                             dataToInsert.push(d);
                         }
                     }
-                    
+
                     //Default/replaceAll
 
                     if (specification == null) {
@@ -79,7 +79,7 @@ function connect(uuid, view) {
                         }
                     }
 
-                    view.update({duration:150, ease:"bounce-in"});
+                    view.update({duration:50, ease:"quad-in"});
                 }
 
             });
@@ -92,19 +92,52 @@ function connect(uuid, view) {
 function replaceAll(view, dataToInsert) {
     view.data("table").remove(function (d) {
         return true
-    }).insert(dataToInsert);
+    }).insert(formatData(dataToInsert));
 }
-//TODO:fix this and the visualisation
+
 function lifo(view, dataToInsert) {
-    //new data in
-    if(buffer.length + dataToInsert.length > bufferSize){
-        buffer = buffer.slice(dataToInsert.length);
+    dataToInsert = formatData(dataToInsert);
+    if(specification.dataSchema.handling.animate != undefined && specification.dataSchema.handling.animate){
+
+        if (buffer.length + dataToInsert.length > bufferSize) {
+            buffer = buffer.slice(dataToInsert.length);
+        }
+
+
+        buffer.push.apply(buffer, dataToInsert);
+
+        model = view.model();
+        model.data("table").remove(function (d) {
+            return !buffer.includes(d); // Funktioniert nicht im IE
+        });
+
+        view.update();
+        model.data("table").insert(dataToInsert);
+
+    } else {
+        //new data in
+
+
+        if (buffer.length + dataToInsert.length > bufferSize) {
+            buffer = buffer.slice(dataToInsert.length);
+        }
+
+
+        buffer.push.apply(buffer, dataToInsert);
+
+        model = view.model();
+        model.data("table").insert(dataToInsert).remove(function (d) {
+            return !buffer.includes(d); // Funktioniert nicht im IE
+        });
     }
-    buffer.push.apply(buffer, dataToInsert);
+}
 
-    model = view.model();
-    model.data("table").insert(dataToInsert).remove(function (d) {
-        return !buffer.includes(d); // Funktioniert nicht im IE
-    });
-
+function formatData(dataToformat) {
+    if (specification.dataSchema.handling.postProcess != undefined && specification.dataSchema.handling.postProcess) {
+        var first = specification.data[0];
+        if (first.format) {
+            return window.dl.read(dataToformat, first.format);
+        }
+    }
+    return dataToformat;
 }

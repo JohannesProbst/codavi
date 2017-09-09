@@ -4,26 +4,28 @@
   "padding": {
     "top": 10,
     "left": 30,
-    "bottom": 30,
-    "right": 10
+    "bottom": 180,
+    "right": 60
   },
   "dataSchema": {
+    "container":"values",
     "fields": [
       {
         "field":"temp",
-        "selector":"/value/text()",
+        "selector":"value/text()",
         "type":"java.lang.Double"
       },
       {
         "field":"timestamp",
-        "selector":"/time/text()",
+        "selector":"time/text()",
         "type":"java.lang.String",
         "transformTo":"TIMESTAMP"
       }
     ],
     "handling": {
       "mode": "lifo",
-      "size":5
+      "size":5,
+      "postProcess":false
     }
   },
   "data": [

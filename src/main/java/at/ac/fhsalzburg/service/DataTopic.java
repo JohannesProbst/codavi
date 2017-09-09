@@ -38,9 +38,6 @@ public class DataTopic extends Topic {
 
     @Override
     public void run() {
-        // Next steps: Daten von datasource laden
-        //              Dynamisches Schema aus moxy verwenden um daten http://www.eclipse.org/eclipselink/documentation/2.5/solutions/jpatoxml006.htm
-        //              Daten welche im Dataschema angegeben sind extrahieren und zurückgeben.
         System.setProperty(JAXBContext.JAXB_CONTEXT_FACTORY, "org.eclipse.persistence.jaxb.JAXBContextFactory");
         setRunning(true);
         try {
@@ -76,13 +73,13 @@ public class DataTopic extends Topic {
             Object o =  um.unmarshal(new StreamSource(inputStream), resultsClass).getValue();
             DynamicEntity in = null;
             if(o instanceof List){
-                // TODO only one datapoint is processed
+                //atm only one datapoint is processed
                 in = (DynamicEntity)((List)o).get(0);
             } else {
                 in = (DynamicEntity) o;
             }
-            //TODO: find test-data with data for bar-chart, pi-chart and line-chart tests
-            //TODO: introduce multiple java-script handler for different data handling
+
+            //atm there are not multiple java-script handlers for different data handling
 
             List<DynamicEntity> content = new ArrayList<>();
             if(Strings.isNullOrEmpty(this.schema.getContainer())){
@@ -102,11 +99,23 @@ public class DataTopic extends Topic {
                 }
                 content.add(out);
             } else {
-                // TODO: transfer duplicated code into own method
+
                 for (DynamicEntity dataPoint : (List<DynamicEntity>) in.get("dataPointList")) {
-                    DynamicEntity out = context.newDynamicEntity("dynamic.outputDataContainer");
+
+
+                    DynamicEntity out = context.newDynamicEntity("dynamic.outputDataObject");
                     for (DataProperty property : schema.getDataProperties()) {
-                        out.set(property.getField(), dataPoint.get(property.getField()));
+                        Object fieldValue = dataPoint.get(property.getField());
+                        if(property.getTransformType() != null){
+                            //Instant dateTime = (Instant) property.getTransformType().convert(fieldValue.toString());
+                            StringBuffer sb = new StringBuffer("new Date(");
+                            //sb.append(dateTime.toEpochMilli());
+                            sb.append(String.valueOf(fieldValue));
+                            sb.append(").getTime()");
+                            out.set(property.getField(), sb.toString());
+                        } else {
+                            out.set(property.getField(), fieldValue);
+                        }
                     }
                     content.add(out);
                 }

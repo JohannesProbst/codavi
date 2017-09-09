@@ -1,11 +1,18 @@
 {
   "dataSchema": {
-    "container": "bla",
+    //is needed to access an array/list of data; specifies the list entry
+    "container": "values",
+    //to specify the attributes (fields) which are you interested in
     "fields": [
       {
+        //the alias of the data-field to reference it in the rest of the vega-speicification
         "field": "category",
+        //the path to the attribute in the origin data object requested from the data source
+        //(if a container is specified it's assumed as root of all attributes)
         "selector": "/foo/bar/baz/value()",
+        //specifies the wanted type of the attribute
         "type": "java.lang.String",
+        //to encapsulate an utc-timestamp into a date-object
         "transform": "TIMESTAMP"
       },
       {
@@ -15,7 +22,16 @@
       }
     ],
     "handling": {
-      "mode": "reloadAll"
+      //spezifies the data processing mode (lifo, reloadAll):
+      //"lifo" ... (last in first out) for a continous chart e.g. line-chart)
+      //"reloadAll" ... replaces the actual visualized data with the next data
+      "mode": "lifo",
+      //spezifies the buffer size for lifomode
+      "size":5,
+      //to fluently animate e.g. a line chart in lifo mode
+      "animate": true,
+      //to run data formatting again after refreshing the data stream
+      "postProcess":true
     }
   }
 }

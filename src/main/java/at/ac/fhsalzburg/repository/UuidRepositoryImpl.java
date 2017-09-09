@@ -35,6 +35,14 @@ public class UuidRepositoryImpl implements UuidRepository {
                 e.printStackTrace();
             }
         }
+        if(uuid.equals("db35d545ff1")){
+            Resource resource = new ClassPathResource("charts/bar-chart-bitcoin.json");
+            try(final Reader reader = new InputStreamReader(resource.getInputStream())) {
+                return CharStreams.toString(reader);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
         return "";
     }
 }
