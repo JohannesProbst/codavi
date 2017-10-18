@@ -23,7 +23,7 @@
       }
     ],
     "handling": {
-      "mode": "lifo",
+      "mode": "reloadAll",
       "size":5,
       "postProcess":false
     }

@@ -3,17 +3,20 @@ import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
 
-import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 public class App {
 
     static Iterator<String> dataIterator;
 
-    static List fileContentList;
+    static Map<String, Iterator> iteratorMap = new HashMap<>();
+
+    static Map<String, List> fileContentListMap = new HashMap<>();
 
     static String path;
 
@@ -32,8 +35,12 @@ public class App {
                     String queryParam = request.getRequestUrl().queryParameter("n");
 
                     try {
-                        if(App.dataIterator == null || !request.getRequestUrl().pathSegments().get(0).equals(App.path) )
+                        if(iteratorMap.containsKey(request.getRequestUrl().pathSegments().get(0)))
+                            App.dataIterator = iteratorMap.get(request.getRequestUrl().pathSegments().get(0));
+                        else {
                             App.dataIterator = getResourceData(request.getRequestUrl().pathSegments().get(0));
+                            App.iteratorMap.put(request.getRequestUrl().pathSegments().get(0),App.dataIterator);
+                        }
                     } catch (Exception e) {
                         e.printStackTrace();
                         return response.setBody(e.toString());
@@ -47,7 +54,8 @@ public class App {
                         builder.append("[ ");
                     do{
                         if (!App.dataIterator.hasNext()){
-                            App.dataIterator = App.fileContentList.iterator();
+                            App.dataIterator = App.fileContentListMap.get(request.getRequestUrl().pathSegments().get(0)).iterator();
+                            App.iteratorMap.put(request.getRequestUrl().pathSegments().get(0),App.dataIterator);
                         }
                         builder.append(App.dataIterator.next());
                         if(n>1)
@@ -70,8 +78,9 @@ public class App {
 
     private static Iterator<String> getResourceData(String path) throws Exception {
         App.path = path;
-        App.fileContentList = Files.readAllLines(Paths.get(ClassLoader.getSystemResource(path+".json").toURI()));
-        App.dataIterator = App.fileContentList.iterator();
+        List fileContentList = Files.readAllLines(Paths.get(ClassLoader.getSystemResource(path+".json").toURI()));
+        App.fileContentListMap.put(path, fileContentList);
+        App.dataIterator = fileContentList.iterator();
         return App.dataIterator;
     }
 }

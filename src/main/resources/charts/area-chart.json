@@ -1,0 +1,109 @@
+{
+  "width": 600,
+  "height": 500,
+  "padding": {"top": 100,"left": 100,"bottom": 100,"right": 100},
+  "dataSchema": {
+    "container":"values",
+    "fields": [
+      {
+        "field":"Wert",
+        "selector":"Wert/text()",
+        "type":"java.lang.Double"
+      },
+      {
+        "field":"Zeit",
+        "selector":"Zeit/text()",
+        "type":"java.lang.String"
+      },
+      {
+        "field":"Name",
+        "selector":"Name/text()",
+        "type":"java.lang.String"
+      }
+    ],
+    "handling": {
+      "mode": "lifo",
+      "animate":true,
+      "postProcess":true,
+      "size":5
+    }
+  },
+  "data": [
+    {
+      "name": "table",
+      "format": {
+        "type": "json",
+        "parse": {"Wert": "number","Zeit": "date"}
+      }
+    }
+  ],
+  "scales": [
+    {
+      "name": "x",
+      "type": "time",
+      "range": "width",
+      "zero": false,
+      "domain": {"data": "table","field": "Zeit"}
+    },
+    {
+      "name": "y",
+      "type": "linear",
+      "range": "height",
+      "nice": true,
+      "domain": {"data": "table","field": "Wert"},
+      "domainMin": 475,
+      "domainMax": 500
+    },
+    {
+      "name": "hugo",
+      "type": "ordinal",
+      "domain": {"data": "table","field": "Name"},
+      "range": "category10"
+    }
+  ],
+  "axes": [
+    {
+      "title": "Time",
+      "type": "x",
+      "scale": "x",
+      "ticks": 20,
+      "tickSizeEnd": 0,
+      "formatType": "utc",
+      "format": "%X"
+    },
+    {"type": "y","scale": "y"}
+  ],
+  "marks": [
+    {
+      "type": "group",
+      "from": {
+        "data": "table",
+        "transform": [
+          {"type": "stack", "groupby": ["Zeit"], "sortby": ["Name"], "field": "Wert"},
+          {"type": "facet","groupby": ["Name"]}]
+      },
+      "marks": [
+        {
+          "type": "area",
+          "properties": {
+            "enter": {
+              "interpolate": {"value": "monotone"},
+              "x": {"scale": "x","field": "Zeit"},
+              "y": {"scale": "y","field": "Wert"},
+              "y2": {"scale": "y","value": 0},
+              "fill": {"scale":"hugo", "field":"Name"}
+            },
+            "update": {
+              "x": {"scale": "x", "field": "Zeit"},
+              "y": {"scale": "y", "field": "Wert"},
+              "fillOpacity": {"value": 1}
+            },
+            "hover": {
+              "fillOpacity": {"value": 0.5}
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

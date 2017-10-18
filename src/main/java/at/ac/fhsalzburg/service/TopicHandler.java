@@ -71,13 +71,14 @@ public class TopicHandler {
                     unmarshaller.setProperty("eclipselink.json.include-root", false);
                     InputStream json = new ByteArrayInputStream(schema.getBytes(StandardCharsets.UTF_8));
                     VegaSchema parsedSchema = (VegaSchema) unmarshaller.unmarshal(new StreamSource(json), VegaSchema.class).getValue();
-                    topic = new DataTopic(destination, messagingTemplate, dataSource, parsedSchema.getSchema());
+                    topic = new DataTopic(destination, messagingTemplate, dataSource, parsedSchema.getSchema(),interval);
+
                 } catch (JAXBException e) {
                     e.printStackTrace();
                     throw new RuntimeException(e);
                 }
             } else {
-                topic = new RandomDataTopic(destination, messagingTemplate);
+                topic = new RandomDataTopic(destination, messagingTemplate, interval);
             }
             topics.put(destination,topic);
         } else {

@@ -1,0 +1,282 @@
+{
+  "width": 400,
+  "height": 200,
+  "padding": {
+    "top": 10,
+    "left": 30,
+    "bottom": 60,
+    "right": 40
+  },
+  "dataSchema": {
+    "container": "Variables",
+    "fields": [{
+      "field": "Wert",
+      "selector": "Wert/text()",
+      "type": "java.lang.Double"
+    },
+      {
+        "field": "Zeit",
+        "selector": "Zeit/text()",
+        "type": "java.lang.String"
+      },
+      {
+        "field": "Name",
+        "selector": "Name/text()",
+        "type": "java.lang.String"
+      }
+    ],
+    "handling": {
+      "mode": "lifo",
+      "animate": true,
+      "postProcess": true,
+      "size": 10
+    }
+  },
+  "data": [{
+    "name": "table",
+    "format": {
+      "type": "json",
+      "parse": {
+        "Wert": "number",
+        "Zeit": "date"
+      }
+    }
+  }],
+  "scales": [{
+    "name": "x",
+    "type": "time",
+    "range": "width",
+    "domain": {
+      "data": "table",
+      "field": "Zeit"
+    }
+  },
+    {
+      "name": "y",
+      "type": "linear",
+      "range": "height",
+      "nice": true,
+      "domain": {
+        "data": "table",
+        "field": "Wert"
+      },
+      "domainMin": 470,
+      "domainMax": 490,
+      "zero":false
+    },
+    {
+      "name": "hugo",
+      "type": "ordinal",
+      "domain": {
+        "data": "table",
+        "field": "Name"
+      },
+      "range": "category10"
+    }
+  ],
+  "axes": [{
+    "type": "x",
+    "scale": "x",
+    "grid": true,
+    "tickSizeEnd": 0,
+    "formatType": "utc",
+    "format": "%X",
+    "properties": {
+      "labels": {
+        "fill": {
+          "value": "steelblue"
+        },
+        "angle": {
+          "value": 50
+        },
+        "fontSize": {
+          "value": 14
+        },
+        "align": {
+          "value": "left"
+        },
+        "baseline": {
+          "value": "middle"
+        },
+        "dx": {
+          "value": 3
+        }
+      }
+    }
+  },
+    {
+      "type": "y",
+      "scale": "y",
+      "grid": true
+    }
+  ],
+  "signals": [{
+    "name": "tooltip",
+    "init": {},
+    "streams": [{
+      "type": "symbol:mouseover",
+      "expr": "datum"
+    },
+      {
+        "type": "symbol:mouseout",
+        "expr": "{}"
+      }
+    ]
+  }],
+  "predicates": [{
+    "name": "tooltip",
+    "type": "==",
+    "operands": [{
+      "signal": "tooltip._id"
+    }, {
+      "arg": "id"
+    }]
+  }],
+  "marks": [{
+    "type": "group",
+    "from": {
+      "data": "table",
+      "transform": [{
+        "type": "facet",
+        "groupby": ["Name"]
+      }]
+    },
+    "marks": [{
+      "type": "line",
+      "properties": {
+        "enter": {
+          "x": {
+            "scale": "x",
+            "field": "Zeit"
+          },
+          "y": {
+            "scale": "y",
+            "field": "Wert"
+          },
+          "stroke": {
+            "scale": "hugo",
+            "field": "Name"
+          },
+          "strokeWidth": {
+            "value": 2
+          }
+        },
+        "update": {
+          "x": {
+            "scale": "x",
+            "field": "Zeit"
+          },
+          "y": {
+            "scale": "y",
+            "field": "Wert"
+          },
+          "stroke": {
+            "scale": "hugo",
+            "field": "Name"
+          },
+          "strokeWidth": {
+            "value": 2
+          }
+        }
+      }
+    },
+      {
+        "type": "symbol",
+        "from": {
+          "data": "table"
+        },
+        "shape": "cross",
+        "properties": {
+          "enter": {
+            "x": {
+              "scale": "x",
+              "field": "Zeit"
+            },
+            "y": {
+              "scale": "y",
+              "field": "Wert"
+            },
+            "fill": {
+              "value": "orange"
+            },
+            "stroke": {
+              "value": "black"
+            },
+            "strockWidth": {
+              "value": 2
+            }
+          },
+          "update": {
+            "stroke": {
+              "value": "steelblue"
+            },
+            "x": {
+              "scale": "x",
+              "field": "Zeit"
+            },
+            "y": {
+              "scale": "y",
+              "field": "Wert"
+            },
+            "fill": {
+              "value": "orange"
+            },
+            "strockWidth": {
+              "value": 2
+            }
+          },
+          "hover": {
+            "stroke": {
+              "value": "red"
+            }
+          }
+        }
+      },
+      {
+        "type": "text",
+        "properties": {
+          "enter": {
+            "align": {
+              "value": "center"
+            },
+            "baseline": {
+              "value": "bottom"
+            },
+            "fill": {
+              "value": "grey"
+            }
+          },
+          "update": {
+            "x": {
+              "scale": "x",
+              "signal": "tooltip.Zeit"
+            },
+            "y": {
+              "scale": "y",
+              "signal": "tooltip.Wert",
+              "offset": -10
+            },
+            "text": {
+              "signal": "tooltip.Wert"
+            },
+            "fillOpacity": {
+              "rule": [{
+                "predicate": {
+                  "name": "tooltip",
+                  "id": {
+                    "value": null
+                  }
+                },
+                "value": 0
+              },
+                {
+                  "value": 1
+                }
+              ]
+            }
+          }
+        }
+      }
+    ]
+  }]
+}

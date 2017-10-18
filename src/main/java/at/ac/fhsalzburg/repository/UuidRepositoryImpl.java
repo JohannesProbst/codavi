@@ -43,6 +43,39 @@ public class UuidRepositoryImpl implements UuidRepository {
                 e.printStackTrace();
             }
         }
+        if(uuid.equals("ff433cd341a")){
+            Resource resource = new ClassPathResource("charts/bar-chart-horizontal.json");
+            try(final Reader reader = new InputStreamReader(resource.getInputStream())) {
+                return CharStreams.toString(reader);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        if(uuid.equals("g1d78ac546b")){
+            Resource resource = new ClassPathResource("charts/wordcloud.json");
+            try(final Reader reader = new InputStreamReader(resource.getInputStream())) {
+                return CharStreams.toString(reader);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        if(uuid.equals("123fc57ab1d")){
+            //TODO: there exist some issues with proper refreshing of the area-chart at the client side
+            Resource resource = new ClassPathResource("charts/area-chart.json");
+            try(final Reader reader = new InputStreamReader(resource.getInputStream())) {
+                return CharStreams.toString(reader);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        if(uuid.equals("ef90ac125db")){
+            Resource resource = new ClassPathResource("charts/zenon-line.json");
+            try(final Reader reader = new InputStreamReader(resource.getInputStream())) {
+                return CharStreams.toString(reader);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
         return "";
     }
 }

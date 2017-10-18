@@ -8,8 +8,8 @@ import java.util.concurrent.TimeUnit;
 public class RandomDataTopic extends Topic {
 
 
-    public RandomDataTopic(String name, MessageSendingOperations<String> messagingTemplate) {
-        super(name, messagingTemplate);
+    public RandomDataTopic(String name, MessageSendingOperations<String> messagingTemplate, Long interval) {
+        super(name, messagingTemplate, interval);
     }
 
     @Override
@@ -29,7 +29,8 @@ public class RandomDataTopic extends Topic {
             sb.append("]");
             send(sb.toString());
             try {
-                Thread.sleep(this.interval);
+                if(this.interval != null)
+                Thread.sleep(TimeUnit.SECONDS.toMillis(this.interval));
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

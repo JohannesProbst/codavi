@@ -15,13 +15,14 @@ public abstract class Topic implements Runnable {
     // Make topics great again!
     private boolean running = false;
 
-    protected Long interval = TimeUnit.SECONDS.toMillis(2);
+    protected Long interval = null;
 
     private Set<String> sessions = Collections.synchronizedSet(new HashSet<>());
 
-    public Topic(String name, MessageSendingOperations<String> messagingTemplate) {
+    public Topic(String name, MessageSendingOperations<String> messagingTemplate, Long interval) {
         this.name = name;
         this.messagingTemplate = messagingTemplate;
+        this.interval = interval != null?interval:null;
     }
 
     protected void setRunning(Boolean value){
@@ -50,8 +51,8 @@ public abstract class Topic implements Runnable {
 
     //interval depends on smallest value (e.g. two requests on the same datasource the smallest interva
     public void updateInterval(Long newInterval){
-        if(this.interval > newInterval){
+        //if(this.interval == 0 || this.interval > newInterval){
             this.interval = newInterval;
-        }
+        //}
     }
 }

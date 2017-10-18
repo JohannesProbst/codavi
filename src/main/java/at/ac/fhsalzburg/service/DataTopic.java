@@ -8,6 +8,7 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
 import net.fortuna.ical4j.model.DateTime;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.eclipse.persistence.dynamic.DynamicEntity;
@@ -15,8 +16,7 @@ import org.eclipse.persistence.jaxb.JAXBContextProperties;
 import org.eclipse.persistence.jaxb.MarshallerProperties;
 import org.eclipse.persistence.jaxb.dynamic.DynamicJAXBContext;
 import org.eclipse.persistence.jaxb.dynamic.DynamicJAXBContextFactory;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.messaging.core.MessageSendingOperations;
 import org.springframework.web.client.RestTemplate;
 
@@ -24,14 +24,15 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 public class DataTopic extends Topic {
 
     private DataObjectSchema schema;
     private String datasource;
 
-    public DataTopic(String name, MessageSendingOperations<String> messagingTemplate, String datasource, DataObjectSchema schema) {
-        super(name, messagingTemplate);
+    public DataTopic(String name, MessageSendingOperations<String> messagingTemplate, String datasource, DataObjectSchema schema, Long interval) {
+        super(name, messagingTemplate, interval);
         this.datasource = datasource;
         this.schema = schema;
     }
@@ -59,7 +60,10 @@ public class DataTopic extends Topic {
         while(true) {
             // Hier daten Daten laden und verarbeiten....
             RestTemplate restTemplate = new RestTemplate();
-            ResponseEntity<String> response = restTemplate.getForEntity(datasource, String.class);
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.99 Safari/537.36");
+            HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
+            ResponseEntity<String> response = restTemplate.exchange(datasource, HttpMethod.GET, entity, String.class);
             InputStream inputStream = new ByteArrayInputStream(response.getBody().getBytes(StandardCharsets.UTF_8));
             if (response.getHeaders().getContentType().toString().startsWith(MediaType.APPLICATION_JSON_VALUE)) {
                 um.setProperty("eclipselink.media-type", "application/json");
@@ -71,42 +75,25 @@ public class DataTopic extends Topic {
             }
 
             Object o =  um.unmarshal(new StreamSource(inputStream), resultsClass).getValue();
-            DynamicEntity in = null;
+            List<DynamicEntity> inputDate = null;
             if(o instanceof List){
                 //atm only one datapoint is processed
-                in = (DynamicEntity)((List)o).get(0);
+                inputDate = ((List)o);
             } else {
-                in = (DynamicEntity) o;
+                inputDate = ((((DynamicEntity)o).get("dataPointList")));
             }
 
             //atm there are not multiple java-script handlers for different data handling
 
+
+
             List<DynamicEntity> content = new ArrayList<>();
-            if(Strings.isNullOrEmpty(this.schema.getContainer())){
-                DynamicEntity out = context.newDynamicEntity("dynamic.outputDataObject");
-                for (DataProperty property : schema.getDataProperties()) {
-                    Object fieldValue = in.get(property.getField());
-                    if(property.getTransformType() != null){
-                        //Instant dateTime = (Instant) property.getTransformType().convert(fieldValue.toString());
-                        StringBuffer sb = new StringBuffer("new Date(");
-                        //sb.append(dateTime.toEpochMilli());
-                        sb.append(String.valueOf(fieldValue));
-                        sb.append(").getTime()");
-                        out.set(property.getField(), sb.toString());
-                    } else {
-                        out.set(property.getField(), fieldValue);
-                    }
-                }
-                content.add(out);
-            } else {
-
-                for (DynamicEntity dataPoint : (List<DynamicEntity>) in.get("dataPointList")) {
-
-
+            for(DynamicEntity in : inputDate) {
+                if (Strings.isNullOrEmpty(this.schema.getContainer())) {
                     DynamicEntity out = context.newDynamicEntity("dynamic.outputDataObject");
                     for (DataProperty property : schema.getDataProperties()) {
-                        Object fieldValue = dataPoint.get(property.getField());
-                        if(property.getTransformType() != null){
+                        Object fieldValue = in.get(property.getField());
+                        if (property.getTransformType() != null) {
                             //Instant dateTime = (Instant) property.getTransformType().convert(fieldValue.toString());
                             StringBuffer sb = new StringBuffer("new Date(");
                             //sb.append(dateTime.toEpochMilli());
@@ -118,6 +105,24 @@ public class DataTopic extends Topic {
                         }
                     }
                     content.add(out);
+                } else {
+
+                        DynamicEntity out = context.newDynamicEntity("dynamic.outputDataObject");
+                        for (DataProperty property : schema.getDataProperties()) {
+                            Object fieldValue = in.get(property.getField());
+                            if (property.getTransformType() != null) {
+                                //Instant dateTime = (Instant) property.getTransformType().convert(fieldValue.toString());
+                                StringBuffer sb = new StringBuffer("new Date(");
+                                //sb.append(dateTime.toEpochMilli());
+                                sb.append(String.valueOf(fieldValue));
+                                sb.append(").getTime()");
+                                out.set(property.getField(), sb.toString());
+                            } else {
+                                out.set(property.getField(), fieldValue);
+                            }
+                        }
+                        content.add(out);
+
                 }
             }
             DynamicEntity list = context.newDynamicEntity("dynamic.outputDataContainer");
@@ -128,7 +133,19 @@ public class DataTopic extends Topic {
             send(outputStream.toString());
 
             try {
-                Thread.sleep(this.interval);
+                if(this.interval == 0){
+                    while(true){
+                        if(this.interval != 0){
+                            break;
+                        }
+                        if(!this.isSubscribed()){
+                            setRunning(false);
+                            return;
+                        }
+                    }
+                }else {
+                    Thread.sleep(TimeUnit.SECONDS.toMillis(this.interval));
+                }
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

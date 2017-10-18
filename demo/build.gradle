@@ -2,6 +2,9 @@ version 'unspecified'
 
 apply plugin: 'java'
 apply plugin: 'war'
+apply plugin: 'application'
+
+mainClassName = 'App'
 
 sourceCompatibility = 1.8
 

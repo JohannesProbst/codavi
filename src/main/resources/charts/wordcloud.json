@@ -1,0 +1,97 @@
+{
+  "width": 1200,
+  "height": 600,
+  "padding": {"top": 100, "left": 100, "bottom": 100, "right": 100},
+  "dataSchema": {
+    "container":"query/recentchanges",
+    "fields": [
+      {
+        "field":"type",
+        "selector":"/type/text()",
+        "type":"java.lang.String"
+      },
+      {
+        "field":"title",
+        "selector":"/title/text()",
+        "type":"java.lang.String"
+      },
+      {
+        "field":"oldlen",
+        "selector":"/oldlen/text()",
+        "type":"java.lang.Integer"
+      },
+      {
+        "field":"newlen",
+        "selector":"/newlen/text()",
+        "type":"java.lang.Integer"
+      }
+    ],
+    "handling": {
+      "mode": "reloadAll",
+      "postProcess":false
+    }
+  },
+  "data": [
+    {
+      "name": "table",
+      "transform": [
+        {
+          "type":"filter",
+          "test":"datum.oldlen != datum.newlen"
+        },
+        {
+          "type": "formula", "field": "count",
+          "expr": "(datum.newlen - datum.oldlen) * (datum.newlen - datum.oldlen)"
+        },
+        {
+          "type": "formula", "field": "angle",
+          "expr": "[-45, 0, 45][~~(random() * 3)]"
+        },
+        {
+          "type": "wordcloud",
+          "size": [1200, 600],
+          "text": {"field": "title"},
+          "rotate": {"field": "angle"},
+          "font": {"value": "Helvetica Neue"},
+          "fontSize": {"field": "count"},
+          "fontWeight": 300,
+          "fontScale": [12, 56]
+        }
+      ]
+    }
+  ],
+  "scales": [
+    {
+      "name": "color",
+      "type": "ordinal",
+      "range": ["#d5a928", "#652c90", "#939597"]
+    }
+  ],
+  "marks": [
+    {
+      "type": "text",
+      "from": {"data": "table"},
+      "properties": {
+        "enter": {
+          "x": {"field": "layout_x"},
+          "y": {"field": "layout_y"},
+          "angle": {"field": "layout_rotate"},
+          "font": {"field": "layout_font"},
+          "fontSize": {"field": "layout_fontSize"},
+          "fontStyle": {"field": "layout_fontStyle"},
+          "fontWeight": {"field": "layout_fontWeight"},
+          "text": {"field": "title"},
+          "align": {"value": "center"},
+          "baseline": {"value": "alphabetic"},
+          "fill": {"scale": "color", "field": "title"}
+        },
+        "update": {
+          "fillOpacity": {"value": 1}
+        },
+        "hover": {
+          "fillOpacity": {"value": 0.5}
+        }
+      }
+    }
+  ]
+}
