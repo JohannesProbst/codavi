@@ -3,7 +3,7 @@
   "height": 200,
   "padding": {
     "top": 10,
-    "left": 30,
+    "left": 100,
     "bottom": 60,
     "right": 40
   },
@@ -30,7 +30,7 @@
     {
       "name": "table",
       "transform": [
-        {"type": "filter","test": "datum.price >  1000 && datum.price < 5000 "}
+        {"type": "filter","test": "datum.price >  1000 && datum.short !='BTWTY'"}
       ]
     }
   ],
